@@ -1,4 +1,4 @@
-import type { Request, Response} from "express";
+import type { Request, Response} from "express"
 
 export function getAllNotes(_: Request, res: Response ){
   res.status(200).send("you just fetched the notes");
