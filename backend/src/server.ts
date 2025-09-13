@@ -1,10 +1,10 @@
 import express from "express"
 import type { Request, Response } from "express"
 import noteRoutes from "./routes/noteRoutes.ts"
-import { connectDB } from "./config/db.ts";
+import { connectDB } from "./config/db.ts"
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
 connectDB();
