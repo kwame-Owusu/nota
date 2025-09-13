@@ -1,25 +1,16 @@
 import express from "express";
-import type { Response, Request } from "express";
+import { getAllNotes, createNote, updateNote, deleteNote } from "../controllers/notesController.ts";
+
 
 const router = express.Router();
 
-router.get("/", (_: Request, res: Response) => {
-  res.status(200).send("you just fetched the notes");
-});
+router.get("/", getAllNotes);
 
-router.post("/", (_: Request, res: Response) => {
-  res.status(201).json({message: "note created successfully!"});
-});
+router.post("/", createNote);
 
-router.put("/:id", (req: Request, res: Response) => {
-  const id = req.params.id;
-  res.status(200).json({message: "note updated successfully"});
-});
+router.put("/:id", updateNote);
 
-router.delete("/:id", (req: Request, res: Response) => {
-  const id = req.params.id;
-  res.status(200).json({message: "note deleted successfully"});
-});
+router.delete("/:id", deleteNote);
 
 
 export default router
