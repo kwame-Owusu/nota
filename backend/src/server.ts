@@ -7,7 +7,6 @@ import rateLimiter from "./middleware/rateLimiter.ts";
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-connectDB();
 app.use(express.json());
 
 app.use(rateLimiter);
@@ -17,6 +16,8 @@ app.get("/ping", (_: Request, res: Response) => {
   res.send("pong");
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running at: http://localhost:${PORT}`);
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server running at: http://localhost:${PORT}`);
+  });
 });
