@@ -1,20 +1,44 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import RateLimited from "../components/RateLimited";
-import axios from "axios";
+import axios, { type AxiosResponse } from "axios";
+import toast from "react-hot-toast";
+import NoteCard from "../components/NoteCard";
+
+export type Note = {
+  _id: string;
+  title: string;
+  content: string;
+  createdAt: string;
+};
 
 const HomePage = () => {
-  const [isRateLimited, setRateLimited] = useState(true);
-  const [notes, setNotes] = useState([]);
+  const [isRateLimited, setIsRateLimited] = useState(false);
+  const [notes, setNotes] = useState<Note[]>([]);
   const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchNotes = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/notes/");
+        const res: AxiosResponse<Note[]> = await axios.get(
+          "http://localhost:3000/api/notes/"
+        );
+        setNotes(res.data);
+        setIsRateLimited(false);
         console.log(res.data);
       } catch (err) {
-        console.log("Error fetching notes,", err);
+        if (axios.isAxiosError(err)) {
+          const status = err.response?.status;
+          if (status === 429) {
+            setIsRateLimited(true);
+          } else {
+            toast.error("Failed to load notes.");
+          }
+        } else {
+          toast.error("Unexpected error occurred.");
+        }
+      } finally {
+        setLoading(false);
       }
     };
     fetchNotes();
@@ -23,6 +47,20 @@ const HomePage = () => {
     <div className="min-h-screen">
       <Navbar />
       {isRateLimited && <RateLimited />}
+      <div className="max-w-txl mx-auto p-4 mt-6">
+        {isLoading && (
+          <div className="text-center text-white py-10">Loading notes...</div>
+        )}
+        {notes.length > 0 && !isRateLimited && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {notes.map((note) => (
+              <div>
+                <NoteCard key={note._id} note={note} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
