@@ -4,6 +4,7 @@ import RateLimited from "../components/RateLimited";
 import axios, { type AxiosResponse } from "axios";
 import toast from "react-hot-toast";
 import NoteCard from "../components/NoteCard";
+import api from "../lib/axios";
 
 export type Note = {
   _id: string;
@@ -20,9 +21,7 @@ const HomePage = () => {
   useEffect(() => {
     const fetchNotes = async () => {
       try {
-        const res: AxiosResponse<Note[]> = await axios.get(
-          "http://localhost:3000/api/notes/"
-        );
+        const res: AxiosResponse<Note[]> = await api.get("notes/");
         setNotes(res.data);
         setIsRateLimited(false);
         console.log(res.data);
