@@ -5,23 +5,31 @@ import { formatDate } from "../lib/utils";
 import type React from "react";
 import api from "../lib/axios";
 import toast from "react-hot-toast";
+import axios from "axios";
+import type { Dispatch, SetStateAction } from "react";
 
+type setNotesType = Dispatch<SetStateAction<Note[]>>;
 interface NoteCardProps {
   note: Note;
+  setNotes: setNotesType;
 }
 
-const NoteCard: React.FC<NoteCardProps> = ({ note }) => {
+const NoteCard: React.FC<NoteCardProps> = ({ note, setNotes }) => {
   const navigate = useNavigate();
   const handleDelete = async (e: React.SyntheticEvent, noteId: string) => {
     e.preventDefault();
+    if (!window.confirm("Are you sure you want to delete this note?")) return;
     try {
       await api.delete(`/notes/${noteId}`);
+      setNotes((prev) => prev.filter((note) => note._id !== noteId));
       toast.success("Note deleted successfully!");
       navigate("/");
       console.log("deleting note", noteId);
     } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.status !== 200) {
+        toast.error("Failed to delete note");
+      }
       console.log("Error deleting note", err);
-      toast.error("Failed to delte note");
     }
   };
 

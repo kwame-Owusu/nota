@@ -5,6 +5,7 @@ import axios, { type AxiosResponse } from "axios";
 import toast from "react-hot-toast";
 import NoteCard from "../components/NoteCard";
 import api from "../lib/axios";
+import NotesNotFound from "../components/NotesNotFound";
 
 export type Note = {
   _id: string;
@@ -49,13 +50,16 @@ const HomePage = () => {
       {isRateLimited && <RateLimited />}
       <div className="max-w-txl mx-auto p-4 mt-6">
         {isLoading && (
-          <div className="text-center text-white py-10">Loading notes...</div>
+          <div className="text-center py-10 text-3xl">Loading notes...</div>
+        )}
+        {notes.length === 0 && !isLoading && !isRateLimited && (
+          <NotesNotFound />
         )}
         {notes.length > 0 && !isRateLimited && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {notes.map((note) => (
               <div>
-                <NoteCard key={note._id} note={note} />
+                <NoteCard key={note._id} note={note} setNotes={setNotes} />
               </div>
             ))}
           </div>
