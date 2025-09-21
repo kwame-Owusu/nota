@@ -1,13 +1,30 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import type { Note } from "../pages/HomePage";
 import { PenSquareIcon, Trash2Icon } from "lucide-react";
 import { formatDate } from "../lib/utils";
+import type React from "react";
+import api from "../lib/axios";
+import toast from "react-hot-toast";
 
 interface NoteCardProps {
   note: Note;
 }
 
 const NoteCard: React.FC<NoteCardProps> = ({ note }) => {
+  const navigate = useNavigate();
+  const handleDelete = async (e: React.SyntheticEvent, noteId: string) => {
+    e.preventDefault();
+    try {
+      await api.delete(`/notes/${noteId}`);
+      toast.success("Note deleted successfully!");
+      navigate("/");
+      console.log("deleting note", noteId);
+    } catch (err) {
+      console.log("Error deleting note", err);
+      toast.error("Failed to delte note");
+    }
+  };
+
   return (
     <Link
       to={`/note/${note._id}`}
@@ -20,9 +37,14 @@ const NoteCard: React.FC<NoteCardProps> = ({ note }) => {
           <span className="text-sm text-base-content/60">
             {formatDate(note.createdAt)}
           </span>
-          <div className="flex items-center gap-1">
-            <PenSquareIcon className="size-4" />
-            <button className="btn btn-ghost btn-xs text-error">
+          <div className="flex items-center gap-1 text-white/70">
+            <button className="btn btn-ghost btn-xs">
+              <PenSquareIcon className="size-4" />
+            </button>
+            <button
+              className="btn btn-ghost btn-xs text-error"
+              onClick={(e) => handleDelete(e, note._id)}
+            >
               <Trash2Icon className="size-4" />
             </button>
           </div>
