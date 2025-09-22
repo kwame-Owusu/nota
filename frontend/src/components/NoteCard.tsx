@@ -24,12 +24,11 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, setNotes }) => {
       setNotes((prev) => prev.filter((note) => note._id !== noteId));
       toast.success("Note deleted successfully!");
       navigate("/");
-      console.log("deleting note", noteId);
     } catch (err) {
+      console.log("Error deleting note", err);
       if (axios.isAxiosError(err) && err.response?.status !== 200) {
         toast.error("Failed to delete note");
       }
-      console.log("Error deleting note", err);
     }
   };
 

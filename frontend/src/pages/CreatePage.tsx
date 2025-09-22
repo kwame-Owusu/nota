@@ -76,7 +76,7 @@ const CreatePage = () => {
                 <div className="card-actions justify-end">
                   <button
                     type="submit"
-                    className="btn btn-base-content border-cyan-50/20"
+                    className="btn border-cyan-50/20"
                     disabled={isLoading}
                   >
                     {isLoading ? "Creating" : "Create Note"}
