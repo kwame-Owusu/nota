@@ -20,6 +20,7 @@ func (app *application) mount() http.Handler {
 	mux.HandleFunc("GET /notes/{id}", app.getNoteByIDHandler)
 	mux.HandleFunc("GET /notes", app.getAllNotesHandler)
 	mux.HandleFunc("POST /notes", app.createNote)
+	mux.HandleFunc("DELETE /notes/{id}", app.deleteNote)
 
 	return mux
 }
@@ -89,6 +90,18 @@ func (app *application) getNoteByIDHandler(w http.ResponseWriter, r *http.Reques
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func (app *application) deleteNote(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	id := r.PathValue("id")
+	err := app.notes.Delete(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 type config struct {

@@ -81,6 +81,19 @@ func (s *NoteStore) Update(ctx context.Context, id string, note *models.Note) er
 }
 
 func (s *NoteStore) Delete(ctx context.Context, id string) error {
-	// TODO: implement delete logic
+	objectID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return fmt.Errorf("invalid ID format: %w", err)
+	}
+
+	result, err := s.col.DeleteOne(ctx, bson.M{"_id": objectID})
+	if err != nil {
+		return fmt.Errorf("failed to delete note: %w", err)
+	}
+
+	if result.DeletedCount == 0 {
+		return fmt.Errorf("note not found")
+	}
+
 	return nil
 }
