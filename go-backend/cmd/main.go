@@ -56,6 +56,6 @@ func main() {
 		notes:  noteStore,
 	}
 
-	fmt.Println("Server running on", cfg.addr)
+	fmt.Printf("Server running on http://localhost%v\n", cfg.addr)
 	http.ListenAndServe(cfg.addr, app.mount())
 }
