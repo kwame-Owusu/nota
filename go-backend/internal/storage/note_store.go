@@ -2,7 +2,10 @@ package storage
 
 import (
 	"context"
+	"fmt"
+
 	"github.com/kwame-Owusu/nota/internal/models"
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
@@ -22,8 +25,19 @@ func (s *NoteStore) Insert(ctx context.Context, note *models.Note) error {
 }
 
 func (s *NoteStore) FindAll(ctx context.Context) ([]models.Note, error) {
-	// TODO: implement find logic
-	return nil, nil
+	var notes []models.Note
+	cursor, err := s.col.Find(ctx, bson.D{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to find notes: %w", err)
+	}
+	defer cursor.Close(ctx)
+
+	// Decode all documents from cursor into notes slice
+	if err = cursor.All(ctx, &notes); err != nil {
+		return nil, fmt.Errorf("failed to decode notes: %w", err)
+	}
+
+	return notes, nil
 }
 
 func (s *NoteStore) FindByID(ctx context.Context, id string) (*models.Note, error) {
