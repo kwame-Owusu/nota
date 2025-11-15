@@ -30,6 +30,11 @@ func main() {
 		log.Fatal("Set your 'MONGO_URI' environment variable.")
 	}
 
+	clientBaseURL := os.Getenv("CLIENT_BASE_URL")
+	if clientBaseURL == "" {
+		log.Fatal("Set your 'CLIENT_BASE_URL' environment variable.")
+	}
+
 	// CONNECT TO MONGO
 	client, err := mongo.Connect(options.Client().ApplyURI(mongoURI))
 	if err != nil {
@@ -55,7 +60,27 @@ func main() {
 		config: cfg,
 		notes:  noteStore,
 	}
+	handler := corsMiddleware(clientBaseURL)(app.mount())
 
 	fmt.Printf("Server running on http://localhost%v\n", cfg.addr)
-	http.ListenAndServe(cfg.addr, app.mount())
+	http.ListenAndServe(cfg.addr, handler)
+}
+
+func corsMiddleware(allowedOrigin string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
+
+			// Handle preflight requests
+			if r.Method == "OPTIONS" {
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
 }
