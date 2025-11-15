@@ -1,22 +1,28 @@
 package main
 
-import "net/http"
+import (
+	"github.com/kwame-Owusu/nota/internal/storage"
+	"net/http"
+)
 
 type application struct {
 	config config
-	// logger
-	// db driver
+	notes  *storage.NoteStore
 }
 
-// mount
 func (app *application) mount() http.Handler {
-	return nil
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/health", app.healthHandler)
+
+	return mux
+}
+
+func (app *application) healthHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(`{"status":"ok"}`))
 }
 
 type config struct {
 	addr string
-	db   dbConfig
-}
-
-type dbConfig struct {
 }
