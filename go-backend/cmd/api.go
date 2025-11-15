@@ -19,8 +19,9 @@ func (app *application) mount() http.Handler {
 	mux.HandleFunc("GET /health", app.healthHandler)
 	mux.HandleFunc("GET /notes/{id}", app.getNoteByIDHandler)
 	mux.HandleFunc("GET /notes", app.getAllNotesHandler)
-	mux.HandleFunc("POST /notes", app.createNote)
-	mux.HandleFunc("DELETE /notes/{id}", app.deleteNote)
+	mux.HandleFunc("POST /notes", app.createNoteHandler)
+	mux.HandleFunc("PUT /notes/{id}", app.updateNoteHandler)
+	mux.HandleFunc("DELETE /notes/{id}", app.deleteNoteHandler)
 
 	return mux
 }
@@ -30,7 +31,7 @@ func (app *application) healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`{"status":"ok"}`))
 }
 
-func (app *application) createNote(w http.ResponseWriter, r *http.Request) {
+func (app *application) createNoteHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	// Decode the request body into a Note struct
@@ -92,7 +93,34 @@ func (app *application) getNoteByIDHandler(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func (app *application) deleteNote(w http.ResponseWriter, r *http.Request) {
+func (app *application) updateNoteHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	id := r.PathValue("id")
+
+	var note models.Note
+	if err := json.NewDecoder(r.Body).Decode(&note); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if note.Title == "" || note.Content == "" {
+		http.Error(w, "Title and content are required", http.StatusBadRequest)
+		return
+	}
+
+	if err := app.notes.Update(r.Context(), id, &note); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(note); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (app *application) deleteNoteHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	id := r.PathValue("id")
 	err := app.notes.Delete(r.Context(), id)

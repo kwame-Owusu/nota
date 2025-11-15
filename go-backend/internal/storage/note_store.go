@@ -76,7 +76,29 @@ func (s *NoteStore) FindByID(ctx context.Context, id string) (*models.Note, erro
 }
 
 func (s *NoteStore) Update(ctx context.Context, id string, note *models.Note) error {
-	// TODO: implement update logic
+	objectID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return fmt.Errorf("invalid ID format: %w", err)
+	}
+	now := time.Now()
+	note.UpdatedAt = now
+
+	update := bson.M{
+		"$set": bson.M{
+			"title":     note.Title,
+			"content":   note.Content,
+			"updatedAt": note.UpdatedAt,
+		},
+	}
+
+	result := s.col.FindOneAndUpdate(ctx, bson.M{"_id": objectID}, update)
+	if err := result.Err(); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return fmt.Errorf("note not found")
+		}
+		return fmt.Errorf("failed to update note: %w", err)
+	}
+
 	return nil
 }
 
