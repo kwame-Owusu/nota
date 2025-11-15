@@ -3,10 +3,10 @@ package storage
 import (
 	"context"
 	"fmt"
-
 	"github.com/kwame-Owusu/nota/internal/models"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"time"
 )
 
 type NoteStore struct {
@@ -20,7 +20,22 @@ func NewNoteStore(db *mongo.Database) *NoteStore {
 }
 
 func (s *NoteStore) Insert(ctx context.Context, note *models.Note) error {
-	// TODO: implement insert logic
+	// Set timestamps
+	now := time.Now()
+	note.CreatedAt = now
+	note.UpdatedAt = now
+
+	// Insert the note (MongoDB will generate _id automatically)
+	result, err := s.col.InsertOne(ctx, note)
+	if err != nil {
+		return fmt.Errorf("failed to insert note: %w", err)
+	}
+
+	// Set the generated ID back to the note struct
+	if oid, ok := result.InsertedID.(bson.ObjectID); ok {
+		note.ID = oid
+	}
+
 	return nil
 }
 

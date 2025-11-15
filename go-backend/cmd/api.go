@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/kwame-Owusu/nota/internal/storage"
 	"net/http"
+
+	"github.com/kwame-Owusu/nota/internal/models"
+	"github.com/kwame-Owusu/nota/internal/storage"
 )
 
 type application struct {
@@ -17,6 +19,7 @@ func (app *application) mount() http.Handler {
 	mux.HandleFunc("GET /health", app.healthHandler)
 	mux.HandleFunc("GET /notes/{id}", app.getNoteByIDHandler)
 	mux.HandleFunc("GET /notes", app.getAllNotesHandler)
+	mux.HandleFunc("POST /notes", app.createNote)
 
 	return mux
 }
@@ -24,6 +27,35 @@ func (app *application) mount() http.Handler {
 func (app *application) healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(`{"status":"ok"}`))
+}
+
+func (app *application) createNote(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	// Decode the request body into a Note struct
+	var note models.Note
+	if err := json.NewDecoder(r.Body).Decode(&note); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	// Validate required fields
+	if note.Title == "" || note.Content == "" {
+		http.Error(w, "Title and content are required", http.StatusBadRequest)
+		return
+	}
+
+	if err := app.notes.Insert(r.Context(), &note); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Return the created note with 201 status
+	w.WriteHeader(http.StatusCreated)
+	if err := json.NewEncoder(w).Encode(note); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func (app *application) getAllNotesHandler(w http.ResponseWriter, r *http.Request) {
