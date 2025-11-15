@@ -41,8 +41,23 @@ func (s *NoteStore) FindAll(ctx context.Context) ([]models.Note, error) {
 }
 
 func (s *NoteStore) FindByID(ctx context.Context, id string) (*models.Note, error) {
-	// TODO: implement findByID logic
-	return nil, nil
+	// Convert string ID to bson.ObjectID
+	objectID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, fmt.Errorf("invalid ID format: %w", err)
+	}
+
+	var note models.Note
+
+	err = s.col.FindOne(ctx, bson.M{"_id": objectID}).Decode(&note)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("note not found")
+		}
+		return nil, fmt.Errorf("failed to find note: %w", err)
+	}
+
+	return &note, nil
 }
 
 func (s *NoteStore) Update(ctx context.Context, id string, note *models.Note) error {

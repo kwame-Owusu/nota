@@ -15,7 +15,8 @@ func (app *application) mount() http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /health", app.healthHandler)
-	mux.HandleFunc("GET /", app.getAllNotesHandler)
+	mux.HandleFunc("GET /notes/{id}", app.getNoteByIDHandler)
+	mux.HandleFunc("GET /notes", app.getAllNotesHandler)
 
 	return mux
 }
@@ -36,6 +37,23 @@ func (app *application) getAllNotesHandler(w http.ResponseWriter, r *http.Reques
 	// Marshal notes to JSON
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(notes); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (app *application) getNoteByIDHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	id := r.PathValue("id")
+
+	note, err := app.notes.FindByID(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(note); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
