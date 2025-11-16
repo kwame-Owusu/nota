@@ -15,7 +15,6 @@ const NoteDetailPage = () => {
   const { id } = useParams();
   useEffect(() => {
     const fetchNotes = async () => {
-      console.log("fetching note with ID: ", id);
       try {
         const res = await api.get(`notes/${id}`);
         setNote(res.data);
