@@ -21,7 +21,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, setNotes }) => {
     if (!window.confirm("Are you sure you want to delete this note?")) return;
     try {
       await api.delete(`/notes/${noteId}`);
-      setNotes((prev) => prev.filter((note) => note._id !== noteId));
+      setNotes((prev) => prev.filter((note) => note.id !== noteId));
       toast.success("Note deleted successfully!");
       navigate("/");
     } catch (err) {
@@ -34,7 +34,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, setNotes }) => {
 
   return (
     <Link
-      to={`/note/${note._id}`}
+      to={`/note/${note.id}`}
       className="card bg-base-100 hover:shadow-lg transition-opacity duration-300 border border-base-content border-opacity-40 hover:border-opacity-100 ease-in"
     >
       <div className="card-body">
@@ -50,7 +50,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ note, setNotes }) => {
             </button>
             <button
               className="btn btn-ghost btn-xs text-error"
-              onClick={(e) => handleDelete(e, note._id)}
+              onClick={(e) => handleDelete(e, note.id)}
             >
               <Trash2Icon className="size-4" />
             </button>

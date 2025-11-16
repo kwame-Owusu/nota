@@ -8,7 +8,7 @@ import api from "../lib/axios";
 import NotesNotFound from "../components/NotesNotFound";
 
 export type Note = {
-  _id: string;
+  id: string;
   title: string;
   content: string;
   createdAt: string;
@@ -22,7 +22,7 @@ const HomePage = () => {
   useEffect(() => {
     const fetchNotes = async () => {
       try {
-        const res: AxiosResponse<Note[]> = await api.get("notes/");
+        const res: AxiosResponse<Note[]> = await api.get("notes");
         setNotes(res.data);
         setIsRateLimited(false);
         console.log(res.data);
@@ -58,8 +58,8 @@ const HomePage = () => {
         {notes.length > 0 && !isRateLimited && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {notes.map((note) => (
-              <div>
-                <NoteCard key={note._id} note={note} setNotes={setNotes} />
+              <div key={note.id}>
+                <NoteCard note={note} setNotes={setNotes} />
               </div>
             ))}
           </div>
