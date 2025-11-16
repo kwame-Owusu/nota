@@ -16,7 +16,7 @@ Pretty standard stuff when it comes to CRUD applications. as CRUD as it can be.
 Wrote the backend in Go, used the standard library for making routing and endpoints. This exposed me to the world of writing endpoints in Go.
 I like this language now, bye bye ts/js on the backend 😭.
 
-## 🛠️ Tech Stack
+## Tech Stack
 ### Backend
 
 Go (Standard Library) + mongo Go driver
